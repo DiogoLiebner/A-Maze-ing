@@ -1,11 +1,56 @@
 from error_handle import InvalidConfig, ImpossibleMaze, BadSyntax
+import typing
 
 
 REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
 
-# create parse_coordinate function to parse the entry and exit coordinates
 
-def read_config(filename: str = "config.txt") -> dict[str, int | str | tuple[int, int]]:
+# FUNCTION FOR MAZE READING TO SEE IF ITS PERFECT IS MISSING, NEEDS TO BE ADDED LATER
+
+
+class Mazeconfig(typing.TypedDict):
+    """
+        TypedDict for the maze configuration parameters.
+    """
+    width: int
+    height: int
+    entry: tuple[int, int]
+    exit: tuple[int, int]
+    output_file: str
+    perfect: bool
+
+
+def parse_coordinate(
+        value: str,
+        key: str,
+        width: int,
+        height: int
+        ) -> tuple[int, int]:
+
+    parts = value.split(",")
+    if len(parts) != 2:
+        raise BadSyntax(
+            f"'{key}' must be in format x, y. Not '{value}'"
+        )
+
+    try:
+        x, y = int(parts[0].strip()), int(parts[1].strip())
+    except ValueError:
+        raise BadSyntax(
+            f"'{key}' coordinates must be integers. Got '{value}'"
+        )
+
+    if not (0 <= x < width) or not (0 <= y < height):
+        raise ImpossibleMaze(
+            f"'{key}' coordinates ({x}, {y}) out of bounds for maze size \
+{width}x{height}"
+        )
+    return (x, y)
+
+
+def read_config(
+        filename: str = "config.txt"
+        ) MazeConfig:
     """
         Reads the maze configuration from a file and returns a
         dictionary with the parameters.
@@ -72,11 +117,11 @@ def read_config(filename: str = "config.txt") -> dict[str, int | str | tuple[int
     if entry == exit:
         raise ImpossibleMaze("'ENTRY' and 'EXIT' cannot be the same")
 
-    config["height"] = height
-    config["width"] = width
-    config["entry"] = entry
-    config["exit"] = exit
-    
-    
-    return config # type: ignore[return-value]
-    # SO METI PARA NAO DAR MYPY ERROR NO FICHEIRO TODO
+    return Mazeconfig(
+        width=width,
+        height=height,
+        entry=entry,
+        exit=exit,
+        output_file=config["output_file"],
+        # Need perfect bool function to define if maze is perfect or not
+    )

@@ -1,3 +1,5 @@
+# Default config file from Subject
+
 WIDTH=20
 HEIGHT=20
 ENTRY=0,0
