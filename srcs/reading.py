@@ -5,10 +5,11 @@ import typing
 REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
 
 
-# FUNCTION FOR MAZE READING TO SEE IF ITS PERFECT IS MISSING, NEEDS TO BE ADDED LATER
+# FUNCTION FOR MAZE READING TO SEE IF ITS PERFECT IS MISSING,
+# NEEDS TO BE ADDED LATER
 
 
-class Mazeconfig(typing.TypedDict):
+class MazeConfig(typing.TypedDict):
     """
         TypedDict for the maze configuration parameters.
     """
@@ -50,7 +51,7 @@ def parse_coordinate(
 
 def read_config(
         filename: str = "config.txt"
-        ) MazeConfig:
+        ) -> MazeConfig:
     """
         Reads the maze configuration from a file and returns a
         dictionary with the parameters.
@@ -111,17 +112,26 @@ def read_config(
             f"'output_file' must be a .txt file, got '{config['output_file']}'"
         )
 
-    entry: tuple[int, int] = parse_coordinate(config["entry"], "entry", width, height)
-    exit: tuple[int, int] = parse_coordinate(config["exit"], "exit", width, height)
+    entry: tuple[int, int] = parse_coordinate(
+        config["entry"],
+        "entry",
+        width,
+        height)
+    exit: tuple[int, int] = parse_coordinate(
+        config["exit"],
+        "exit",
+        width,
+        height)
 
     if entry == exit:
         raise ImpossibleMaze("'ENTRY' and 'EXIT' cannot be the same")
 
-    return Mazeconfig(
+    return MazeConfig(
         width=width,
         height=height,
         entry=entry,
         exit=exit,
         output_file=config["output_file"],
+        perfect=True
         # Need perfect bool function to define if maze is perfect or not
     )
