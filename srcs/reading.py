@@ -105,7 +105,7 @@ def read_config(
         raise ImpossibleMaze("WIDTH and HEIGHT must be positive integers")
 
     if height <= 5 or width <= 7:
-        raise ImpossibleMaze("Maze too small: minimum size is 8x6")
+        raise ImpossibleMaze("Maze too small for 42 pattern")
 
     if not config["output_file"].endswith(".txt"):
         raise InvalidConfig(
