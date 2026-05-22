@@ -38,10 +38,10 @@ def _carve_passages(
         for dr, dc in directions:
             nr, nc = current_r + dr, current_c + dc
 
-            if (0 <= nr < height) and (0 <= nc < width) and (nr, nc) not in visited:
+            if (0 <= nr < height)\
+                    and (0 <= nc < width) and (nr, nc) not in visited:
 
                 grid[2 * nr + 1][2 * nc + 1] = 0
-
                 grid[2 * current_r + 1 + dr][2 * current_c + 1 + dc] = 0
 
                 visited.add((nr, nc))
