@@ -1,5 +1,4 @@
 import random
-import typing
 from .reading import MazeConfig
 
 
@@ -19,7 +18,7 @@ def _carve_passages(
         height: int,
         width: int,
         visited: set[tuple[int, int]]
-    ) -> None:
+        ) -> None:
     """
         Carves passages in the grid using a depth-first search algorithm.
     """
@@ -32,7 +31,7 @@ def _carve_passages(
 
     while stack:
         current_r, current_c = stack[-1]
-    
+
         random.shuffle(directions)
 
         carved: bool = False
@@ -43,7 +42,7 @@ def _carve_passages(
 
                 grid[2 * nr + 1][2 * nc + 1] = 0
 
-                grid [2 * current_r + 1 + dr][2 * current_c + 1 + dc] = 0
+                grid[2 * current_r + 1 + dr][2 * current_c + 1 + dc] = 0
 
                 visited.add((nr, nc))
                 stack.append((nr, nc))
@@ -77,7 +76,10 @@ def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
         grid[r][c] = 0
 
 
-def generate_maze(config: MazeConfig, loop_factor: float = 0.1) -> list[list[int]]:
+def generate_maze(
+        config: MazeConfig,
+        loop_factor: float = 0.1
+        ) -> list[list[int]]:
     width: int = config["width"]
     height: int = config["height"]
     entry: tuple[int, int] = config["entry"]

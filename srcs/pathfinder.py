@@ -40,7 +40,8 @@ def _to_maze_coords(grid_pos: tuple[int, int]) -> tuple[int, int]:
 def find_path(
         grid: list[list[int]],
         config: MazeConfig
-    ) -> list[tuple[int, int]] | None:
+        ) -> list[tuple[int, int]] | None:
+
     """
         Find the shortest path through the maze from start to end using A*.
 
