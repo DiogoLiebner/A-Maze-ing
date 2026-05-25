@@ -1,10 +1,10 @@
-from reading import MazeConfig
+from .reading import MazeConfig
 
 
 def _encode_cell(
           grid: list[list[int]],
-          maze_r: int,
-          maze_c: int
+          maze_c: int,
+          maze_r: int
         ) -> str:
     gr: int = 2 * maze_r + 1
     gc: int = 2 * maze_c + 1
@@ -29,15 +29,14 @@ def _path_to_directions(path: list[tuple[int, int]]) -> str:
         dr: int = next_r - curr_r
         dc: int = next_c - curr_c
 
-    if dr == -1:
-        directions.append("N")
-    elif dr == 1:
-        directions.append("S")
-    elif dc == 1:
-        directions.append("E")
-    elif dc == -1:
-        directions.append("W")
-
+        if dr < 0:
+            directions.append("N")
+        elif dr > 0:
+            directions.append("S")
+        elif dc > 0:
+            directions.append("E")
+        elif dc < 0:
+            directions.append("W")
     return "".join(directions)
 
 
@@ -61,6 +60,6 @@ def write_output(
             f.write(row_str + "\n")
 
         f.write("\n")
-        f.write(f"{entry[1]},{entry[0]}\n")
-        f.write(f"{exit[1]},{exit[0]}\n")
+        f.write(f"{entry[0]},{entry[1]}\n")
+        f.write(f"{exit[0]},{exit[1]}\n")
         f.write(_path_to_directions(path) + "\n")

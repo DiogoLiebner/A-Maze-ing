@@ -1,8 +1,8 @@
-from error_handle import InvalidConfig, ImpossibleMaze, BadSyntax
+from .error_handle import InvalidConfig, ImpossibleMaze, BadSyntax
 import typing
 
 
-REQUIRED_KEYS = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
+REQUIRED_KEYS = {"width", "height", "entry", "exit", "output_file", "perfect"}
 
 
 # FUNCTION FOR MAZE READING TO SEE IF ITS PERFECT IS MISSING,
@@ -35,18 +35,18 @@ def parse_coordinate(
         )
 
     try:
-        x, y = int(parts[0].strip()), int(parts[1].strip())
+        col, row = int(parts[0].strip()), int(parts[1].strip())
     except ValueError:
         raise BadSyntax(
             f"'{key}' coordinates must be integers. Got '{value}'"
         )
 
-    if not (0 <= x < width) or not (0 <= y < height):
+    if not (0 <= col < width) or not (0 <= row < height):
         raise ImpossibleMaze(
-            f"'{key}' coordinates ({x}, {y}) out of bounds for maze size \
+            f"'{key}' coordinates ({col}, {row}) out of bounds for maze size \
 {width}x{height}"
         )
-    return (x, y)
+    return (row, col)
 
 
 def read_config(
@@ -84,8 +84,7 @@ def read_config(
                 raise BadSyntax(
                     f"Line {line_num} has an empty value: '{line}'"
                 )
-
-        config[key] = value
+            config[key] = value
 
     missing: set[str] = REQUIRED_KEYS - config.keys()
     if missing:
@@ -132,6 +131,6 @@ def read_config(
         entry=entry,
         exit=exit,
         output_file=config["output_file"],
-        perfect=True
+        perfect=config["perfect"]
         # Need perfect bool function to define if maze is perfect or not
     )

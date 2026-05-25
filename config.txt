@@ -1,8 +1,6 @@
-# Default config file from Subject
-
-WIDTH=20
-HEIGHT=20
-ENTRY=0,0
-EXIT=19,14
+WIDTH=50
+HEIGHT=25
+ENTRY=4,4
+EXIT=42,24
 OUTPUT_FILE=maze.txt
 PERFECT=TRUE

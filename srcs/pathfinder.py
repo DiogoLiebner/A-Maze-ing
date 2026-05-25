@@ -1,5 +1,5 @@
 import heapq
-from reading import MazeConfig
+from .reading import MazeConfig
 
 
 def _heuristic(a: tuple[int, int], b: tuple[int, int]) -> int:
