@@ -5,10 +5,11 @@ from srcs.pathfinder import find_path
 from srcs.outputwrite import write_output
 from srcs.error_handle import MazeError, ImpossibleMaze, InvalidConfig, BadSyntax
 
+
 def print_maze(
     grid: list[list[int]],
     path: list[tuple[int, int]] | None,
-    config: MazeConfig
+    config: MazeConfig,
 ) -> None:
     """
     Print the maze to the terminal with the solution path overlaid.
@@ -28,7 +29,6 @@ def print_maze(
     start: tuple[int, int] = config["entry"]
     end:   tuple[int, int] = config["exit"]
 
-    # Convert maze path coords to grid coords for overlay
     path_cells: set[tuple[int, int]] = set()
     if path:
         for maze_r, maze_c in path:
@@ -47,6 +47,8 @@ def print_maze(
                 line += "E"
             elif pos in path_cells:
                 line += "·"
+            elif cell == 2:
+                line += "▓"
             elif cell == 1:
                 line += "█"
             else:
@@ -60,13 +62,10 @@ def main() -> None:
     finds path, prints to terminal and writes output file.
     """
     try:
-        cfg:  MazeConfig               = read_config("config.txt")
-        maze: list[list[int]]          = generate_maze(cfg)
-        path: list[tuple[int, int]] | None = find_path(maze, cfg)
-
-        # Terminal preview
+        cfg = read_config("config.txt")
+        maze = generate_maze(cfg)
+        path = find_path(maze, cfg)
         print_maze(maze, path, cfg)
-
         if path:
             print(f"\nPath found! {len(path)} steps.")
             print(f"Attempting to write to: {cfg['output_file']}")
