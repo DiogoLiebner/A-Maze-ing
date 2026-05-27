@@ -160,20 +160,7 @@ def generate_maze(
 
     _carve_passages(grid, entry[0], entry[1], height, width, visited)
 
-    exit_r, exit_c = exit
-    rows = len(grid)
-    cols = len(grid)
-
-    if exit_r == height - 1:
-        grid[rows - 1][2 * exit_c + 1] = 0
-    elif exit_r == 0:
-        grid[0][2 * exit_c + 1] = 0
-    elif exit_c == width - 1:
-        grid[2 * exit_r + 1][cols - 1] = 0
-    elif exit_c == 0:
-        grid[2 * exit_r + 1][0] = 0
-    else:
-        grid[2 * exit_r + 1][2 * exit_c + 1] = 0
+    grid[2 * exit[0] + 1][2 * exit[1] + 1] = 0
 
     if not perfect:
         _add_loops(grid, loop_factor)
