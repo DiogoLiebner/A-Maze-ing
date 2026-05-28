@@ -1,1 +1,0 @@
-cc MLXmain.c -Iminilibx-linux -Lminilibx-linux -lmlx -lXext -lX11 -lm
