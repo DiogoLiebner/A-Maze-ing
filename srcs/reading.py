@@ -41,12 +41,12 @@ def parse_coordinate(
             f"'{key}' coordinates must be integers. Got '{value}'"
         )
 
-    if not (0 <= col <= width - 1) or not (0 <= row <= height - 1):
+    if not (1 <= col <= width) or not (1 <= row <= height):
         raise ImpossibleMaze(
             f"'{key}' coordinates ({col}, {row}) out of bounds for maze size \
 {width}x{height}"
         )
-    return (row, col)
+    return (row - 1, col - 1)
 
 
 def read_config(

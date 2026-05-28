@@ -3,19 +3,23 @@ from .reading import MazeConfig
 
 
 _DIGIT_4 = [
-    "1 0 0",
-    "1 0 0",
-    "1 1 1",
-    "0 0 1",
-    "0 0 1",
+    "1 0 0 0 0",
+    "1 0 0 0 0",
+    "1 0 0 0 0",
+    "1 1 1 1 1",
+    "0 0 0 0 1",
+    "0 0 0 0 1",
+    "0 0 0 0 1"
 ]
 
 _DIGIT_2 = [
-    "1 1 1",
-    "0 0 1",
-    "1 1 1",
-    "1 0 0",
-    "1 1 1",
+    "1 1 1 1 1",
+    "0 0 0 0 1",
+    "0 0 0 0 1",
+    "1 1 1 1 1",
+    "1 0 0 0 0",
+    "1 0 0 0 0",
+    "1 1 1 1 1",
 ]
 
 
@@ -154,9 +158,9 @@ def generate_maze(
     for r in range(height):
         for c in range(width):
             gr, gc = 2 * r + 1, 2 * c + 1
-            if (start_r <= gr < start_r + digit_h and
-                    start_c <= gc < start_c + total_w):
-                visited.add((r,c))
+            if (0 <= gr < len(grid) and 0 <= gc < len(grid[0]) and
+                    grid[gr][gc] == 2):
+                visited.add((r, c))
 
     _carve_passages(grid, entry[0], entry[1], height, width, visited)
 

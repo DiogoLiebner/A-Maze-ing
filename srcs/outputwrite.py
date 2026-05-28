@@ -60,6 +60,6 @@ def write_output(
             f.write(row_str + "\n")
 
         f.write("\n")
-        f.write(f"{entry[0]},{entry[1]}\n")
-        f.write(f"{exit[0]},{exit[1]}\n")
+        f.write(f"{entry[0] + 1},{entry[1] + 1}\n")
+        f.write(f"{exit[0] + 1},{exit[1] + 1}\n")
         f.write(_path_to_directions(path) + "\n")
