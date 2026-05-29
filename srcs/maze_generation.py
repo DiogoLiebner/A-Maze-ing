@@ -3,23 +3,19 @@ from .reading import MazeConfig
 
 
 _DIGIT_4 = [
-    "1 0 0 0 0",
-    "1 0 0 0 0",
-    "1 0 0 0 0",
-    "1 1 1 1 1",
-    "0 0 0 0 1",
-    "0 0 0 0 1",
-    "0 0 0 0 1"
+    "1 0 0",
+    "1 0 0",
+    "1 1 1",
+    "0 0 1",
+    "0 0 1"
 ]
 
 _DIGIT_2 = [
-    "1 1 1 1 1",
-    "0 0 0 0 1",
-    "0 0 0 0 1",
-    "1 1 1 1 1",
-    "1 0 0 0 0",
-    "1 0 0 0 0",
-    "1 1 1 1 1",
+    "1 1 1",
+    "0 0 1",
+    "1 1 1",
+    "1 0 0",
+    "1 1 1",
 ]
 
 
@@ -27,40 +23,36 @@ def _parse_digit(pattern: list[str]) -> list[list[str]]:
     return [[int(v) for v in row.split()] for row in pattern]
 
 
-def _stamp_42(grid: list[list[int]]) -> tuple[int, int, int, int]:
-    rows = len(grid)
-    cols = len(grid[0])
-
+def _stamp_42(grid: list[list[int]], height: int, width: int) -> set[tuple[int, int]]:
     digit_4 = _parse_digit(_DIGIT_4)
     digit_2 = _parse_digit(_DIGIT_2)
 
     digit_h = len(digit_4)
     digit_w = len(digit_4[0])
-    spacing = 2
-    total_w = digit_w * 2 + spacing
-    total_h = digit_h
+    spacing = 1
+    total_w = digit_w + spacing + digit_w
 
-    start_r = ((rows - total_h) // 2) & ~1
-    start_c = ((cols - total_w) // 2) & ~1
+    start_lr = height // 2 - digit_h // 2
+    start_lc = width // 2 - total_w // 2
 
-    def stamp_digit(
-        pattern: list[list[int]],
-        offset_c: int
-    ) -> None:
+    stamped: set[tuple[int, int]] = set()
+
+    def stamp_digit(pattern: list[list[int]], offset_lc: int) -> None:
         for r in range(digit_h):
             for c in range(digit_w):
-                gr = start_r + r
-                gc = start_c + offset_c + c
-                if (0 <= gr < rows and 0 <= gc < cols):
+                lr = start_lr + r
+                lc = start_lc + offset_lc + c
+                gr = 2 * lr + 1
+                gc = 2 * lc + 1
+                if 0 <= gr < len(grid) and 0 <= gc < len(grid[0]):
                     if pattern[r][c] == 1:
                         grid[gr][gc] = 2
-                    else:
-                        grid[gr][gc] = 0
+                        stamped.add((lr, lc))
 
     stamp_digit(digit_4, 0)
     stamp_digit(digit_2, digit_w + spacing)
 
-    return start_r, start_c, digit_h, total_w
+    return stamped
 
 
 def _build_grid(width: int, height: int) -> list[list[str]]:
@@ -152,15 +144,9 @@ def generate_maze(
     perfect: bool = config["perfect"]
 
     grid: list[list[int]] = _build_grid(width, height)
-    start_r, start_c, digit_h, total_w = _stamp_42(grid)
+    stamped = _stamp_42(grid, height, width)
 
-    visited: set[tuple[int, int]] = set()
-    for r in range(height):
-        for c in range(width):
-            gr, gc = 2 * r + 1, 2 * c + 1
-            if (0 <= gr < len(grid) and 0 <= gc < len(grid[0]) and
-                    grid[gr][gc] == 2):
-                visited.add((r, c))
+    visited: set[tuple[int, int]] = stamped.copy()
 
     _carve_passages(grid, entry[0], entry[1], height, width, visited)
 
