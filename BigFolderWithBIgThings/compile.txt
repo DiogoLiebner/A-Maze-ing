@@ -1,0 +1,4 @@
+cc MLXmain.c parser.c render.c ft_split.c \
+GetNextLine/get_next_line.c GetNextLine/get_next_line_utils.c \
+-I GetNextLine -I minilibx-linux \
+-L minilibx-linux -lmlx -lXext -lX11 -lm
