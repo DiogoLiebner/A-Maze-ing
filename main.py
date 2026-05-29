@@ -48,7 +48,7 @@ def print_maze(
             elif pos in path_cells:
                 line += "·"
             elif cell == 2:
-                line += "▓"
+                line += "\033[96m█\033[0m"
             elif cell == 1:
                 line += "█"
             else:

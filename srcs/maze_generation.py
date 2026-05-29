@@ -110,26 +110,40 @@ def _carve_passages(
 def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
     """
         Randomly adds loops to the maze by removing some walls.
+        Only removes walls that are well-isolated and won't affect main paths.
     """
     rows: int = len(grid)
     cols: int = len(grid[0])
 
     candidate_walls: list[tuple[int, int]] = []
 
-    for r in range(1, rows - 1):
-        for c in range(1, cols - 1):
-            if grid[r][c] == 2:
+    for r in range(2, rows - 2):
+        for c in range(2, cols - 2):
+            if grid[r][c] == 2 or grid[r][c] == 0:
                 continue
-            if grid[r][c] == 0 and grid[r][c + 1] == 0:
-                candidate_walls.append((r, c))
-            if grid[r][c] == 0 and grid[r + 1][c] == 0:
-                candidate_walls.append((r, c))
+            if grid[r][c] == 1:
+                # Only consider walls with specific patterns
+                # Check if this is a "dead end" wall
+                neighbors_open = sum([
+                    grid[r - 1][c] == 0,
+                    grid[r + 1][c] == 0,
+                    grid[r][c - 1] == 0,
+                    grid[r][c + 1] == 0,
+                ])
+                # Only add if exactly 2 neighbors are open
+                # (connecting two areas)
+                if neighbors_open == 2:
+                    # Verify they're opposite
+                    if (grid[r - 1][c] == 0 and grid[r + 1][c] == 0) or \
+                       (grid[r][c - 1] == 0 and grid[r][c + 1] == 0):
+                        candidate_walls.append((r, c))
 
     random.shuffle(candidate_walls)
-    remove_count: int = int(len(candidate_walls) * loop_factor)
+    # Be more conservative with loop factor
+    remove_count: int = max(1, int(len(candidate_walls) * loop_factor * 0.3))
 
     for r, c in candidate_walls[:remove_count]:
-        if grid[r][c] != 2:
+        if grid[r][c] == 1:
             grid[r][c] = 0
 
 
@@ -141,7 +155,6 @@ def generate_maze(
     height: int = config["height"]
     entry: tuple[int, int] = config["entry"]
     exit: tuple[int, int] = config["exit"]
-    perfect: bool = config["perfect"]
 
     grid: list[list[int]] = _build_grid(width, height)
     stamped = _stamp_42(grid, height, width)
@@ -152,7 +165,7 @@ def generate_maze(
 
     grid[2 * exit[0] + 1][2 * exit[1] + 1] = 0
 
-    if not perfect:
+    if config["perfect"] is False:
         _add_loops(grid, loop_factor)
 
     return grid

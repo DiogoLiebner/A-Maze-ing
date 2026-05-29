@@ -131,6 +131,5 @@ def read_config(
         entry=entry,
         exit=exit,
         output_file=config["output_file"],
-        perfect=config["perfect"]
-        # Need perfect bool function to define if maze is perfect or not
+        perfect=False ###config["perfect"]
     )
