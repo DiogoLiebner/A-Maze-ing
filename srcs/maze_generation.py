@@ -109,8 +109,9 @@ def _carve_passages(
 
 def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
     """
-        Randomly adds loops to the maze by removing some walls.
-        Only removes walls that are well-isolated and won't affect main paths.
+        Randomly adds loops to the maze by removing valid between-cell walls.
+        This avoids even-even intersection removals and can be more aggressive
+        depending on loop_factor.
     """
     rows: int = len(grid)
     cols: int = len(grid[0])
@@ -119,28 +120,26 @@ def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
 
     for r in range(2, rows - 2):
         for c in range(2, cols - 2):
-            if grid[r][c] == 2 or grid[r][c] == 0:
+            if grid[r][c] in (0, 2):
                 continue
-            if grid[r][c] == 1:
-                # Only consider walls with specific patterns
-                # Check if this is a "dead end" wall
-                neighbors_open = sum([
-                    grid[r - 1][c] == 0,
-                    grid[r + 1][c] == 0,
-                    grid[r][c - 1] == 0,
-                    grid[r][c + 1] == 0,
-                ])
-                # Only add if exactly 2 neighbors are open
-                # (connecting two areas)
-                if neighbors_open == 2:
-                    # Verify they're opposite
-                    if (grid[r - 1][c] == 0 and grid[r + 1][c] == 0) or \
-                       (grid[r][c - 1] == 0 and grid[r][c + 1] == 0):
-                        candidate_walls.append((r, c))
+            if grid[r][c] != 1:
+                continue
+
+            # Only consider walls that separate two cells:
+            # - vertical walls => odd row, even col
+            # - horizontal walls => even row, odd col
+            # Skip even-even intersection points, which can create
+            # illegal teleport shortcuts when removed.
+            if r % 2 == 1 and c % 2 == 0:
+                if grid[r][c - 1] == 0 and grid[r][c + 1] == 0:
+                    candidate_walls.append((r, c))
+            elif r % 2 == 0 and c % 2 == 1:
+                if grid[r - 1][c] == 0 and grid[r + 1][c] == 0:
+                    candidate_walls.append((r, c))
 
     random.shuffle(candidate_walls)
-    # Be more conservative with loop factor
-    remove_count: int = max(1, int(len(candidate_walls) * loop_factor * 0.3))
+    # Remove a larger share of valid candidate walls for more loops.
+    remove_count: int = max(1, int(len(candidate_walls) * loop_factor * 1.5))
 
     for r, c in candidate_walls[:remove_count]:
         if grid[r][c] == 1:
