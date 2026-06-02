@@ -116,19 +116,30 @@ void parse_maze_file(t_data *data, char *filename)
        STEP 3: GRID SIZE
        ========================= */
     data->rows = grid_end;
-    data->cols = strcspn(lines[0], "\n");
+    data->cols = strlen(lines[0]);
+    if (lines[0][data->cols - 1] == '\n')
+        data->cols--;
 
     allocate_grid(data, data->rows, data->cols);
+    for (int i = 0; i < data->rows; i++)
+    {
+        for (int j = 0; j < data->cols; j++)
+            data->grid[i][j].walls = 0;
+    }
 
     /* =========================
        STEP 4: FILL GRID
        ========================= */
     for (int i = 0; i < data->rows; i++)
+    lines[i][strcspn(lines[i], "\n")] = '\0';
+    for (int i = 0; i < data->rows; i++)
     {
         for (int j = 0; j < data->cols; j++)
         {
-            data->grid[i][j].walls =
-                hex_to_int(lines[i][j]);
+            if (lines[i][j] == '\0')
+                data->grid[i][j].walls = 0;
+            else
+                data->grid[i][j].walls = hex_to_int(lines[i][j]);
         }
     }
 
@@ -152,6 +163,8 @@ void parse_maze_file(t_data *data, char *filename)
         write(1, "Invalid entry format\n", 22);
         return;
     }
+    data->entry_x -= 1;
+    data->entry_y -= 1;
 
     /* EXIT */
     if (sscanf(exit_line, "%d,%d",
@@ -160,6 +173,8 @@ void parse_maze_file(t_data *data, char *filename)
         write(1, "Invalid exit format\n", 21);
         return;
     }
+    data->exit_x -= 1;
+    data->exit_y -= 1;
 
     /* PATH */
     data->path = strdup(dir_line);
