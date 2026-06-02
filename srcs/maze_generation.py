@@ -157,7 +157,10 @@ def generate_maze(
     exit: tuple[int, int] = config["exit"]
 
     grid: list[list[int]] = _build_grid(width, height)
-    stamped = _stamp_42(grid, height, width)
+
+    stamped: set[tuple[int, int]] = set()
+    if height > 5 and width > 7:
+        stamped = _stamp_42(grid, height, width)
 
     visited: set[tuple[int, int]] = stamped.copy()
 

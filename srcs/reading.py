@@ -17,6 +17,7 @@ class MazeConfig(typing.TypedDict):
     output_file: str
     perfect: bool
     seed: int | None
+    stamp_warning: str | None
 
 
 def parse_coordinate(
@@ -101,8 +102,9 @@ def read_config(
     if height <= 0 or width <= 0:
         raise ImpossibleMaze("WIDTH and HEIGHT must be positive integers")
 
+    stamp_warning: str | None = None
     if height <= 5 or width <= 7:
-        raise ImpossibleMaze("Maze too small for 42 pattern")
+        stamp_warning = "Warning: Maze too small for 42 pattern"
 
     if not config["output_file"].endswith(".txt"):
         raise InvalidConfig(
@@ -124,12 +126,13 @@ def read_config(
         raise ImpossibleMaze("'ENTRY' and 'EXIT' cannot be the same")
 
     top, bottom, left, right = get_stamp_bounds(height, width)
-    for coord, name in [(entry, "entry"), (exit, "exit")]:
-        if top <= coord[0] <= bottom and left <= coord[1] <= right:
-            raise ImpossibleMaze(
-                f"'{name.upper()}' coordinate ({coord[1]}, "
-                f"{coord[0]}) cannot be inside the 42 stamp"
-            )
+    if stamp_warning is None:
+        for coord, name in [(entry, "entry"), (exit, "exit")]:
+            if top <= coord[0] <= bottom and left <= coord[1] <= right:
+                raise ImpossibleMaze(
+                    f"'{name.upper()}' coordinate ({coord[1]}, "
+                    f"{coord[0]}) cannot be inside the 42 stamp"
+                )
 
     try:
         perfect: bool = config["perfect"].lower() in ("true", "1")
@@ -150,5 +153,6 @@ def read_config(
         exit=exit,
         output_file=config["output_file"],
         perfect=perfect,
-        seed=seed
+        seed=seed,
+        stamp_warning=stamp_warning
     )
