@@ -1,0 +1,14 @@
+[
+build-system
+]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[
+project
+]
+name = "mazegen"
+version = "1.0.0"
+description = "Maze Generation algorythm package"
+requires-python = ">=3.10"
+dependencies = ""

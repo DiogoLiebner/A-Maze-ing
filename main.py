@@ -1,9 +1,10 @@
 # main.py
+import time
 from srcs.reading import read_config, MazeConfig
 from srcs.maze_generation import generate_maze
 from srcs.pathfinder import find_path
 from srcs.outputwrite import write_output
-from srcs.error_handle import MazeError, ImpossibleMaze, InvalidConfig, BadSyntax
+from srcs.error_handle import MazeError
 
 
 def print_maze(

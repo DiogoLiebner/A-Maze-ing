@@ -23,7 +23,10 @@ def _parse_digit(pattern: list[str]) -> list[list[str]]:
     return [[int(v) for v in row.split()] for row in pattern]
 
 
-def _stamp_42(grid: list[list[int]], height: int, width: int) -> set[tuple[int, int]]:
+def _stamp_42(
+            grid: list[list[int]],
+            height: int, width: int
+        ) -> set[tuple[int, int]]:
     digit_4 = _parse_digit(_DIGIT_4)
     digit_2 = _parse_digit(_DIGIT_2)
 
@@ -150,6 +153,7 @@ def generate_maze(
         config: MazeConfig,
         loop_factor: float = 0.1
         ) -> list[list[int]]:
+
     width: int = config["width"]
     height: int = config["height"]
     entry: tuple[int, int] = config["entry"]
@@ -160,8 +164,12 @@ def generate_maze(
 
     visited: set[tuple[int, int]] = stamped.copy()
 
-    _carve_passages(grid, entry[0], entry[1], height, width, visited)
+    if config["seed"] is not None:
+        random.seed(config["seed"])
 
+    _carve_passages(grid, 0, 0, height, width, visited)
+
+    grid[2 * entry[0] + 1][2 * entry[1] + 1] = 0
     grid[2 * exit[0] + 1][2 * exit[1] + 1] = 0
 
     if config["perfect"] is False:

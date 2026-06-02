@@ -5,10 +5,6 @@ import typing
 REQUIRED_KEYS = {"width", "height", "entry", "exit", "output_file", "perfect"}
 
 
-# FUNCTION FOR MAZE READING TO SEE IF ITS PERFECT IS MISSING,
-# NEEDS TO BE ADDED LATER
-
-
 class MazeConfig(typing.TypedDict):
     """
         TypedDict for the maze configuration parameters.
@@ -19,6 +15,7 @@ class MazeConfig(typing.TypedDict):
     exit: tuple[int, int]
     output_file: str
     perfect: bool
+    seed: int | None
 
 
 def parse_coordinate(
@@ -125,11 +122,24 @@ def read_config(
     if entry == exit:
         raise ImpossibleMaze("'ENTRY' and 'EXIT' cannot be the same")
 
+    try:
+        perfect: bool = config["perfect"].lower() in ("true", "1")
+    except ValueError:
+        raise BadSyntax("PERFECT must be 'true' or 'false'")
+
+    seed: int | None = None
+    if "seed" in config:
+        try:
+            seed = int(config["seed"])
+        except ValueError:
+            raise BadSyntax("SEED must be an integer")
+
     return MazeConfig(
         width=width,
         height=height,
         entry=entry,
         exit=exit,
         output_file=config["output_file"],
-        perfect=False ###config["perfect"]
+        perfect=perfect,
+        seed=seed
     )
