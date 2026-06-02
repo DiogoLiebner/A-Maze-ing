@@ -1,6 +1,7 @@
 #include "maze.h"
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 /* =========================
    PIXEL DRAWING
@@ -25,21 +26,28 @@ void put_pixel(t_data *data, int x, int y, int color)
    LINE DRAWING
    ========================= */
 
-void draw_line(t_data *data, int x1, int y1, int x2, int y2)
+void draw_line(t_data *data, int x1, int y1, int x2, int y2, int color, int thickness)
 {
     int dx = abs(x2 - x1);
     int dy = abs(y2 - y1);
     int steps = (dx > dy) ? dx : dy;
 
-    float x_inc = (steps == 0) ? 0 : (float)(x2 - x1) / steps;
-    float y_inc = (steps == 0) ? 0 : (float)(y2 - y1) / steps;
-
     float x = x1;
     float y = y1;
+    float x_inc = (float)(x2 - x1) / steps;
+    float y_inc = (float)(y2 - y1) / steps;
 
     for (int i = 0; i <= steps; i++)
     {
-        put_pixel(data, (int)x, (int)y, 0xFFFFFF);
+        // draw thickness (square brush)
+        for (int tx = -thickness / 2; tx <= thickness / 2; tx++)
+        {
+            for (int ty = -thickness / 2; ty <= thickness / 2; ty++)
+            {
+                put_pixel(data, (int)x + tx, (int)y + ty, color);
+            }
+        }
+
         x += x_inc;
         y += y_inc;
     }
@@ -97,13 +105,13 @@ void render_maze(t_data *d)
 
             /* draw walls */
             if (walls & 1)
-                draw_line(d, x, y, x + CELL_SIZE, y);
+                draw_line(d, x, y, x + CELL_SIZE, y, d->wall_color,2);
             if (walls & 2)
-                draw_line(d, x + CELL_SIZE, y, x + CELL_SIZE, y + CELL_SIZE);
+                draw_line(d, x + CELL_SIZE, y, x + CELL_SIZE, y + CELL_SIZE, d->wall_color, 2);
             if (walls & 4)
-                draw_line(d, x, y + CELL_SIZE, x + CELL_SIZE, y + CELL_SIZE);
+                draw_line(d, x, y + CELL_SIZE, x + CELL_SIZE, y + CELL_SIZE, d->wall_color, 2);
             if (walls & 8)
-                draw_line(d, x, y, x, y + CELL_SIZE);
+                draw_line(d, x, y, x, y + CELL_SIZE, d->wall_color, 2);
         }
     }
 
@@ -165,7 +173,7 @@ void draw_path_line(t_data *d)
 {
     d->path_mode = 1;
 
-    for (int i = 1; i < d->path_len; i++)
+    for (int i = 1; i < d->path_progress; i++)
     {
         int x1 = d->path_cells[i - 1].x;
         int y1 = d->path_cells[i - 1].y;
@@ -178,10 +186,23 @@ void draw_path_line(t_data *d)
         int px2 = x2 * CELL_SIZE + CELL_SIZE / 2;
         int py2 = y2 * CELL_SIZE + CELL_SIZE / 2;
 
-        draw_line(d, px1, py1, px2, py2);
+        draw_line(d, px1, py1, px2, py2, 0xFF0000,2);
     }
 
     d->path_mode = 0;
+}
+
+int animate(void *param)
+{
+    t_data *d = (t_data *)param;
+
+    if (d->path_progress < d->path_len)
+    {
+        d->path_progress++;
+        render(d);
+        usleep(50000);
+    }
+    return (0);
 }
 
 /* =========================
