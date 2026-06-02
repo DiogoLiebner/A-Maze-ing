@@ -1,4 +1,5 @@
 from .error_handle import InvalidConfig, ImpossibleMaze, BadSyntax
+from .maze_utils import get_stamp_bounds
 import typing
 
 
@@ -38,12 +39,12 @@ def parse_coordinate(
             f"'{key}' coordinates must be integers. Got '{value}'"
         )
 
-    if not (1 <= col <= width) or not (1 <= row <= height):
+    if not (0 <= col < width) or not (0 <= row < height):
         raise ImpossibleMaze(
             f"'{key}' coordinates ({col}, {row}) out of bounds for maze size \
 {width}x{height}"
         )
-    return (row - 1, col - 1)
+    return (row, col)
 
 
 def read_config(
@@ -121,6 +122,14 @@ def read_config(
 
     if entry == exit:
         raise ImpossibleMaze("'ENTRY' and 'EXIT' cannot be the same")
+
+    top, bottom, left, right = get_stamp_bounds(height, width)
+    for coord, name in [(entry, "entry"), (exit, "exit")]:
+        if top <= coord[0] <= bottom and left <= coord[1] <= right:
+            raise ImpossibleMaze(
+                f"'{name.upper()}' coordinate ({coord[1]}, "
+                f"{coord[0]}) cannot be inside the 42 stamp"
+            )
 
     try:
         perfect: bool = config["perfect"].lower() in ("true", "1")

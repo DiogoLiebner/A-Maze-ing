@@ -1,5 +1,6 @@
 import random
 from .reading import MazeConfig
+from .maze_utils import _parse_digit
 
 
 _DIGIT_4 = [
@@ -17,10 +18,6 @@ _DIGIT_2 = [
     "1 0 0",
     "1 1 1",
 ]
-
-
-def _parse_digit(pattern: list[str]) -> list[list[str]]:
-    return [[int(v) for v in row.split()] for row in pattern]
 
 
 def _stamp_42(
