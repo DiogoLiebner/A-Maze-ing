@@ -1,14 +1,13 @@
-[
-build-system
-]
+[build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[
-project
-]
+[project]
 name = "mazegen"
 version = "1.0.0"
-description = "Maze Generation algorythm package"
+description = "Maze Generation algorythm package from the A-Maze-ing project"
 requires-python = ">=3.10"
-dependencies = ""
+dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["mazegen"]
