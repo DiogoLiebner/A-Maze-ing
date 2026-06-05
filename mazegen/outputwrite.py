@@ -60,6 +60,7 @@ def write_output(
             f.write(row_str + "\n")
 
         f.write("\n")
+        # Write coordinates as 1-based (parser expects 1-based and subtracts 1)
         f.write(f"{entry[1] + 1},{entry[0] + 1}\n")
         f.write(f"{exit[1] + 1},{exit[0] + 1}\n")
         f.write(_path_to_directions(path) + "\n")

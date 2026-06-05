@@ -17,6 +17,9 @@ def main() -> None:
     grid = generate_maze(config)
 
     path = find_path(grid, config)
+    if path is None:
+        raise MazeError("No path found from ENTRY to EXIT")
+
     write_output(grid, config, path)
 
     subprocess.run(["./maze_viewer", config["output_file"]], check=True)
