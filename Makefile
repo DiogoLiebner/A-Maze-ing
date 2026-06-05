@@ -5,8 +5,8 @@ C_SRCS:= MiniLibX/MLXmain.c \
 		MiniLibX/render.c \
 		MiniLibX/parser.c \
 		MiniLibX/ft_split.c \
-		MiniLibX/GetNextLine/get_next_line.c \
-		MiniLibX/GetNextLine/get_next_line_utils.c
+		MiniLibX/get_next_line.c \
+		MiniLibX/get_next_line_utils.c
 
 C_INCLUDES:= 	-I MiniLibX -I $(MLX_DIR)
 C_FLAGS:=		-Wall -Wextra -Werror
@@ -51,7 +51,7 @@ lint:
 	$(VENV)/bin/mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
-	$(VENV)/bin/flake8 .
-	$(VENV)/bin/mypy . --strict
+	$(PYTHON) -m $(PIP) flake8 .
+	$(PYTHON) -m $(PIP) mypy . --strict
 
 .PHONY: all install run debug clean lint lint-strict

@@ -4,28 +4,6 @@
 #include <string.h>
 
 /* =========================
-   COUNT ROWS
-   ========================= */
-
-static int count_rows(char *filename)
-{
-    int fd = open(filename, O_RDONLY);
-    int rows = 0;
-    char *line;
-
-    if (fd < 0)
-        return (-1);
-
-    while ((line = get_next_line(fd)))
-    {
-        rows++;
-        free(line);
-    }
-    close(fd);
-    return (rows);
-}
-
-/* =========================
    ALLOCATE GRID
    ========================= */
 

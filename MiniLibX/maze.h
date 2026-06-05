@@ -70,8 +70,6 @@ void    render_maze(t_data *data);
 void    draw_line(t_data *data, int x1, int y1, int x2, int y2, int color, int thickness);
 void    parse_maze_file(t_data *data, char *filename);
 void    allocate_grid(t_data *data, int rows, int cols);
-static int  count_cols(char **split);
-static int  count_rows(char *filename);
 char	**ft_split(char const *s, char c);
 void build_path_cells(t_data *d);
 int is_on_path(t_data *d, int x, int y);
