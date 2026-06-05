@@ -139,7 +139,7 @@ def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
 
     random.shuffle(candidate_walls)
     # Remove a larger share of valid candidate walls for more loops.
-    remove_count: int = max(1, int(len(candidate_walls) * loop_factor * 1.5))
+    remove_count: int = max(1, int(len(candidate_walls) * loop_factor))
 
     for r, c in candidate_walls[:remove_count]:
         if grid[r][c] == 1:

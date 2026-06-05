@@ -1,11 +1,12 @@
 import subprocess
-import os
 import sys
-from reading import MazeConfig, read_config
-from maze_generation import generate_maze
-from pathfinder import find_path
-from outputwrite import write_output
-from error_handle import MazeError
+from mazegen import (
+    read_config,
+    find_path,
+    generate_maze,
+    write_output,
+    MazeError
+)
 
 
 def main() -> None:
@@ -15,7 +16,8 @@ def main() -> None:
 
     grid = generate_maze(config)
 
-    write_output(grid, config["output_file"])
+    path = find_path(grid, config)
+    write_output(grid, config, path)
 
     subprocess.run(["./maze_viewer", config["output_file"]], check=True)
 

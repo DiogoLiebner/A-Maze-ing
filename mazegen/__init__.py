@@ -5,3 +5,5 @@ from .maze_generation import generate_maze
 from .pathfinder import find_path
 from .outputwrite import write_output
 from .error_handle import BadSyntax, ImpossibleMaze, InvalidConfig, MazeError
+
+__version__ = "1.0.0"
