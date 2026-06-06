@@ -15,18 +15,64 @@ void draw_something(t_data *data)
 int key_hook(int keycode, void *param)
 {
     t_data *data = (t_data *)param;
-
     printf("KEY: %d\n", keycode);
 
-    // ❌ ESC (Linux version)
-    if (keycode == 65307)
+    if (keycode == 65307) // ESC
     {
         mlx_destroy_window(data->mlx, data->win);
         exit(0);
     }
 
+    if (keycode == 65293) // ENTER → regenerate maze
+    {
+        system("python3 main.py");
+
+        // free old grid
+        for (int i = 0; i < data->rows; i++)
+            free(data->grid[i]);
+        free(data->grid);
+        data->grid = NULL;
+
+        // free old path
+        free(data->path);
+        free(data->path_cells);
+        data->path = NULL;
+        data->path_cells = NULL;
+        data->path_len = 0;
+        data->path_progress = 0;
+
+        // re-parse the new maze file
+        parse_maze_file(data, data->filename);
+
+        // resize window if dimensions changed
+        int new_w = data->cols * CELL_SIZE;
+        int new_h = data->rows * CELL_SIZE;
+        if (new_w != data->win_w || new_h != data->win_h)
+        {
+            data->win_w = new_w;
+            data->win_h = new_h;
+            mlx_destroy_window(data->mlx, data->win);
+            data->win = mlx_new_window(data->mlx, data->win_w, data->win_h, "maze");
+            mlx_hook(data->win, 17, 0, close_window, data);
+            mlx_key_hook(data->win, key_hook, data);
+            mlx_loop_hook(data->mlx, animate, data);
+        }
+
+        render(data);
+        return (0);
+    }
+
+    if (keycode == 32) // spacebar → toggle path
+    {
+        if (data->path_progress == 0)
+            data->path_progress = 1;
+        else
+            data->path_progress = 0;
+        render(data);
+    }
+
     if (keycode == 49) data->wall_color = 0xFFFFFF; // 1 = white
-    if (keycode == 50) data->wall_color = 0x870FFF; // 2 = red
+    if (keycode == 50) data->wall_color = 0x870FFF; // 2 = purple
     if (keycode == 51) data->wall_color = 0x00FF00; // 3 = green
     if (keycode == 52) data->wall_color = 0x0000FF; // 4 = blue
     if (keycode == 53) data->wall_color = 0xFFFF00; // 5 = yellow
@@ -35,14 +81,7 @@ int key_hook(int keycode, void *param)
     if (keycode == 56) data->wall_color = 0x888888; // 8 = gray
     if (keycode == 57) data->wall_color = 0xFFA500; // 9 = orange
 
-    if (keycode == 65361) data->x -= 10; // left
-    if (keycode == 65363) data->x += 10; // right
-    if (keycode == 65364) data->y += 10; // down
-    if (keycode == 65362) data->y -= 10; // up
-
-    // 🔄 redraw
     render(data);
-
     return (0);
 }
 
@@ -54,48 +93,6 @@ int close_window(void *param)
     exit(0);
     return (0);
 }
-
-void draw_circle(t_data *data, int cx, int cy, int r, int color)
-{
-    int x, y;
-
-    for (x = -r; x <= r; x++)
-    {
-        for (y = -r; y <= r; y++)
-        {
-            if (x*x + y*y <= r*r)
-                put_pixel(data, cx + x, cy + y, color);
-        }
-    }
-}
-
-/*int main(void)
-{
-    t_data data;
-    data.x = WIDTH / 2;
-    data.y = HEIGHT / 2;
-
-
-    data.mlx = mlx_init();
-    data.win = mlx_new_window(data.mlx, WIDTH, HEIGHT, "MLX Test");
-
-    data.img = mlx_new_image(data.mlx, WIDTH, HEIGHT);
-    data.addr = mlx_get_data_addr(
-        data.img,
-        &data.bpp,
-        &data.line_len,
-        &data.endian
-    );
-
-    draw_circle(&data, 100, 100, 50, 0xFF0000);
-
-    mlx_put_image_to_window(data.mlx, data.win, data.img, 0, 0);
-
-    mlx_key_hook(data.win, key_hook, &data);
-    mlx_hook(data.win, 17, 0, close_window, &data);
-
-    mlx_loop(data.mlx);
-}*/
 
 int main(int argc, char **argv)
 {
@@ -119,8 +116,9 @@ int main(int argc, char **argv)
     data.path = NULL;
     data.path_cells = NULL;
     data.path_len = 0;
-    data.path_progress = 1;
+    data.path_progress = 0;
     data.wall_color = 0xFFFFFF;
+    data.filename = argv[1];
 
     /* =========================
        PARSE FILE (sets rows/cols)
@@ -135,7 +133,7 @@ int main(int argc, char **argv)
     data.win_h = data.rows * CELL_SIZE;
 
     /* =========================
-       CREATE WINDOW (NOW SAFE)
+       CREATE WINDOW
        ========================= */
     data.win = mlx_new_window(
         data.mlx,
