@@ -58,29 +58,27 @@ void parse_maze_file(t_data *data, char *filename)
        STEP 1: READ ALL LINES
        ========================= */
     while ((line = get_next_line(fd)))
-    {
         lines[count++] = line;
-    }
     close(fd);
 
     /* =========================
-       STEP 2: FIND GRID END
-       (first non-hex line)
+       STEP 2: STRIP ALL NEWLINES FIRST
+       ========================= */
+    for (int i = 0; i < count; i++)
+        lines[i][strcspn(lines[i], "\n")] = '\0';
+
+    /* =========================
+       STEP 3: FIND GRID END
+       (first line containing comma)
        ========================= */
     int grid_end = 0;
 
     while (grid_end < count)
     {
         if (!lines[grid_end] || !lines[grid_end][0])
-        {
-            grid_end++;
-            continue;
-        }
-
-        /* if line contains comma → metadata starts */
+            break;
         if (strchr(lines[grid_end], ','))
             break;
-
         grid_end++;
     }
 
@@ -90,26 +88,24 @@ void parse_maze_file(t_data *data, char *filename)
         return;
     }
 
+    printf("grid_end: %d\n", grid_end);
+    printf("rows: %d\n", data->rows);
+    printf("last grid line: '%s'\n", lines[grid_end - 1]);
+
     /* =========================
-       STEP 3: GRID SIZE
+       STEP 4: GRID SIZE
        ========================= */
     data->rows = grid_end;
     data->cols = strlen(lines[0]);
-    if (lines[0][data->cols - 1] == '\n')
-        data->cols--;
 
     allocate_grid(data, data->rows, data->cols);
     for (int i = 0; i < data->rows; i++)
-    {
         for (int j = 0; j < data->cols; j++)
             data->grid[i][j].walls = 0;
-    }
 
     /* =========================
-       STEP 4: FILL GRID
+       STEP 5: FILL GRID
        ========================= */
-    for (int i = 0; i < data->rows; i++)
-    lines[i][strcspn(lines[i], "\n")] = '\0';
     for (int i = 0; i < data->rows; i++)
     {
         for (int j = 0; j < data->cols; j++)
@@ -122,17 +118,15 @@ void parse_maze_file(t_data *data, char *filename)
     }
 
     /* =========================
-       STEP 5: ENTRY / EXIT / PATH
+       STEP 6: ENTRY / EXIT / PATH
        ========================= */
+    int meta = grid_end;
+    while (!lines[meta] || !lines[meta][0])
+        meta++;
 
-    char *entry_line = lines[grid_end];
-    char *exit_line  = lines[grid_end + 1];
-    char *dir_line   = lines[grid_end + 2];
-
-    /* strip newlines */
-    entry_line[strcspn(entry_line, "\n")] = 0;
-    exit_line[strcspn(exit_line, "\n")] = 0;
-    dir_line[strcspn(dir_line, "\n")] = 0;
+    char *entry_line = lines[meta];
+    char *exit_line  = lines[meta + 1];
+    char *dir_line   = lines[meta + 2];
 
     /* ENTRY */
     if (sscanf(entry_line, "%d,%d",
@@ -159,7 +153,7 @@ void parse_maze_file(t_data *data, char *filename)
     build_path_cells(data);
 
     /* =========================
-       STEP 6: CLEANUP
+       STEP 7: CLEANUP
        ========================= */
     for (int i = 0; i < count; i++)
         free(lines[i]);
