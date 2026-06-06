@@ -17,7 +17,7 @@ void put_pixel(t_data *data, int x, int y, int color)
     dst = data->addr + (y * data->line_len + x * (data->bpp / 8));
 
     if (data->path_mode)
-        color = 0xFF0000; // 🔴 force red
+        color = 0xFF0000; // force red
 
     *(unsigned int *)dst = color;
 }
@@ -68,19 +68,15 @@ void fill_cell(t_data *d, int x, int y, int w, int h, int color)
     }
 }
 
-/* =========================
-   PATH CHECK
-   ========================= */
-
-int is_on_path(t_data *d, int x, int y)
+void render_entry_exit(t_data *d)
 {
-    for (int i = 0; i < d->path_len; i++)
-    {
-        if (d->path_cells[i].x == x &&
-            d->path_cells[i].y == y)
-            return 1;
-    }
-    return 0;
+    int ex = d->entry_x * CELL_SIZE;
+    int ey = d->entry_y * CELL_SIZE;
+    int xx = d->exit_x * CELL_SIZE;
+    int xy = d->exit_y * CELL_SIZE;
+
+    fill_cell(d, ex, ey, CELL_SIZE, CELL_SIZE, 0x00FF00); // green = entry
+    fill_cell(d, xx, xy, CELL_SIZE, CELL_SIZE, 0xFF0000); // red = exit
 }
 
 /* =========================
@@ -94,6 +90,8 @@ void render_maze(t_data *d)
     int x;
     int y;
     int walls;
+
+    render_entry_exit(d);
 
     for (i = 0; i < d->rows; i++)
     {
@@ -115,7 +113,6 @@ void render_maze(t_data *d)
         }
     }
 
-    /* ⭐ PATH IS DRAWN LAST (IMPORTANT) */
     draw_path_line(d);
 }
 
@@ -127,41 +124,54 @@ void build_path_cells(t_data *d)
 
     int len = strlen(d->path);
     d->path_cells = malloc(sizeof(t_point) * (len + 1));
+    if (!d->path_cells)
+        return;
+
     d->path_len = 0;
 
+    /* starting point */
     d->path_cells[d->path_len++] = (t_point){x, y};
 
     while (d->path[i])
     {
         char c = d->path[i];
 
+        /* skip whitespace */
         if (c == '\n' || c == '\r' || c == ' ')
         {
             i++;
             continue;
         }
 
+        /* compute next position (DO NOT APPLY YET) */
+        int new_x = x;
+        int new_y = y;
+
         if (c == 'W')
-            x--;
+            new_x--;
         else if (c == 'E')
-            x++;
+            new_x++;
         else if (c == 'N')
-            y--;
+            new_y--;
         else if (c == 'S')
-            y++;
+            new_y++;
         else
         {
             i++;
             continue;
         }
 
-        /* =========================
-           CRITICAL SAFETY CLAMP
-           ========================= */
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x >= d->cols) x = d->cols - 1;
-        if (y >= d->rows) y = d->rows - 1;
+        /* reject invalid moves (instead of clamping) */
+        if (new_x < 0 || new_y < 0 ||
+            new_x >= d->cols || new_y >= d->rows)
+        {
+            i++;
+            continue;
+        }
+
+        /* apply valid move */
+        x = new_x;
+        y = new_y;
 
         d->path_cells[d->path_len++] = (t_point){x, y};
 
@@ -180,13 +190,23 @@ void draw_path_line(t_data *d)
         int x2 = d->path_cells[i].x;
         int y2 = d->path_cells[i].y;
 
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+
+        if (!((dx == 1 && dy == 0) ||
+              (dx == -1 && dy == 0) ||
+              (dx == 0 && dy == 1) ||
+              (dx == 0 && dy == -1)))
+        {
+            continue;
+        }
+
         int px1 = x1 * CELL_SIZE + CELL_SIZE / 2;
         int py1 = y1 * CELL_SIZE + CELL_SIZE / 2;
-
         int px2 = x2 * CELL_SIZE + CELL_SIZE / 2;
         int py2 = y2 * CELL_SIZE + CELL_SIZE / 2;
 
-        draw_line(d, px1, py1, px2, py2, 0xFF0000,2);
+        draw_line(d, px1, py1, px2, py2, 0xFF0000, 2);
     }
 
     d->path_mode = 0;
@@ -196,7 +216,7 @@ int animate(void *param)
 {
     t_data *d = (t_data *)param;
 
-    if (d->path_progress < d->path_len)
+    if (d->path_progress > 0 && d->path_progress < d->path_len)
     {
         d->path_progress++;
         render(d);
