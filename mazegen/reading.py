@@ -1,6 +1,7 @@
+import typing
+
 from .error_handle import InvalidConfig, ImpossibleMaze, BadSyntax
 from .maze_utils import get_stamp_bounds
-import typing
 
 
 REQUIRED_KEYS = {"width", "height", "entry", "exit", "output_file", "perfect"}
@@ -43,7 +44,8 @@ def parse_coordinate(
     # Config coordinates are 1-based for user convenience. Convert to 0-based.
     if not (1 <= col <= width) or not (1 <= row <= height):
         raise ImpossibleMaze(
-            f"'{key}' coordinates ({col}, {row}) out of bounds for maze size {width}x{height}"
+            f"'{key}' coordinates ({col}, {row}) out of bounds for maze size "
+            f"{width}x{height}"
         )
 
     return (row - 1, col - 1)

@@ -55,7 +55,7 @@ def _stamp_42(
     return stamped
 
 
-def _build_grid(width: int, height: int) -> list[list[str]]:
+def _build_grid(width: int, height: int) -> list[list[int]]:
     """
         Initializes the maze grid with walls and spaces.
     """

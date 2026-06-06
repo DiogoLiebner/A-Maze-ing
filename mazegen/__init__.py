@@ -6,4 +6,16 @@ from .pathfinder import find_path
 from .outputwrite import write_output
 from .error_handle import BadSyntax, ImpossibleMaze, InvalidConfig, MazeError
 
+__all__ = [
+    "read_config",
+    "MazeConfig",
+    "generate_maze",
+    "find_path",
+    "write_output",
+    "BadSyntax",
+    "ImpossibleMaze",
+    "InvalidConfig",
+    "MazeError",
+]
+
 __version__ = "1.0.0"

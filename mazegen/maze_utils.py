@@ -18,7 +18,7 @@ _DIGIT_2 = [
 ]
 
 
-def _parse_digit(pattern: list[str]) -> list[list[str]]:
+def _parse_digit(pattern: list[str]) -> list[list[int]]:
     return [[int(v) for v in row.split()] for row in pattern]
 
 
