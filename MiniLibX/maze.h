@@ -56,6 +56,7 @@ typedef struct s_data
     int     path_progress;
     int     wall_color;
     char    *filename;
+    int     maze_h;
 }   t_data;
 
 
@@ -75,5 +76,6 @@ void fill_cell(t_data *d, int x, int y, int w, int h, int color);
 void draw_path_line(t_data *d);
 int animate(void *param);
 void render_entry_exit(t_data *d);
+void render_instructions(t_data *d);
 
 #endif

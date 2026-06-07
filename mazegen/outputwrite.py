@@ -2,9 +2,9 @@ from .reading import MazeConfig
 
 
 def _encode_cell(
-          grid: list[list[int]],
-          maze_c: int,
-          maze_r: int
+        grid: list[list[int]],
+        maze_c: int,
+        maze_r: int
         ) -> str:
     """Encode a single maze cell as a hexadecimal wall bitmask.
 
@@ -38,13 +38,15 @@ def _encode_cell(
     gr: int = 2 * maze_r + 1
     gc: int = 2 * maze_c + 1
 
+    # preserve stamp marker
+    if grid[gr][gc] == 2:
+        return 'Z'
+
     north: int = grid[gr - 1][gc]
     east: int = grid[gr][gc + 1]
     south: int = grid[gr + 1][gc]
     west: int = grid[gr][gc - 1]
-
     value: int = (north << 0) | (east << 1) | (south << 2) | (west << 3)
-
     return format(value, 'X')
 
 
@@ -148,7 +150,6 @@ def write_output(
             f.write(row_str + "\n")
 
         f.write("\n")
-        # Write coordinates as 1-based (parser expects 1-based and subtracts 1)
         f.write(f"{entry[1] + 1},{entry[0] + 1}\n")
         f.write(f"{exit[1] + 1},{exit[0] + 1}\n")
         f.write(_path_to_directions(path) + "\n")
