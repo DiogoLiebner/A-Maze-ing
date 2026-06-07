@@ -11,7 +11,7 @@ void put_pixel(t_data *data, int x, int y, int color)
 {
     char *dst;
 
-    if (x < 0 || y < 0 || x >= data->win_w || y >= data->win_h)
+    if (x < 0 || y < 0 || x >= data->win_w || y >= data->maze_h)
         return;
 
     dst = data->addr + (y * data->line_len + x * (data->bpp / 8));
@@ -99,6 +99,9 @@ void render_maze(t_data *d)
         {
             x = j * CELL_SIZE;
             y = i * CELL_SIZE;
+
+            if (d->grid[i][j].walls == 16)
+                fill_cell(d, x, y, CELL_SIZE, CELL_SIZE, 0x00FFFF);
             walls = d->grid[i][j].walls;
 
             /* draw walls */
@@ -114,6 +117,16 @@ void render_maze(t_data *d)
     }
 
     draw_path_line(d);
+}
+
+void render_instructions(t_data *d)
+{
+    int y = d->maze_h + 15;
+
+    mlx_string_put(d->mlx, d->win, 10, y,      0xFFFFFF, "1-9: Change wall color");
+    mlx_string_put(d->mlx, d->win, 10, y + 20, 0xFFFFFF, "SPACE: Show/hide path");
+    mlx_string_put(d->mlx, d->win, 10, y + 40, 0xFFFFFF, "LEFT SHIFT: Generate new maze");
+    mlx_string_put(d->mlx, d->win, 10, y + 60, 0xFFFFFF, "ESC: Quit");
 }
 
 void build_path_cells(t_data *d)
@@ -234,7 +247,7 @@ void render(t_data *data)
     if (data->img)
         mlx_destroy_image(data->mlx, data->img);
 
-    data->img = mlx_new_image(data->mlx, data->win_w, data->win_h);
+    data->img = mlx_new_image(data->mlx, data->win_w, data->maze_h);
     data->addr = mlx_get_data_addr(
         data->img,
         &data->bpp,
@@ -245,4 +258,5 @@ void render(t_data *data)
     render_maze(data);
 
     mlx_put_image_to_window(data->mlx, data->win, data->img, 0, 0);
+    render_instructions(data);
 }
