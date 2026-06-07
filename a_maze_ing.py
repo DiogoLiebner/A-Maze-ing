@@ -12,6 +12,8 @@ from mazegen import (
 def main() -> None:
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else "config.txt"
 
+    no_launch = "--no-launch" in sys.argv
+
     config = read_config(cfg_file)
 
     grid = generate_maze(config)
@@ -21,8 +23,8 @@ def main() -> None:
         raise MazeError("No path found from ENTRY to EXIT")
 
     write_output(grid, config, path)
-
-    subprocess.run(["./maze_viewer", config["output_file"]], check=True)
+    if not no_launch:
+        subprocess.run(["./maze_viewer", config["output_file"]], check=True)
 
 
 if __name__ == "__main__":
