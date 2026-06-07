@@ -1,0 +1,68 @@
+# =============================================================================
+# Python artifacts
+# =============================================================================
+
+# Byte-compiled / optimised / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+*.egg
+dist/
+build/
+wheels/
+*.whl
+*.tar.gz
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+
+# Linting
+.flake8
+
+# pytest
+.pytest_cache/
+.cache/
+
+# =============================================================================
+# C artifacts
+# =============================================================================
+
+# Compiled binaries
+maze_viewer
+
+# Object files
+*.o
+*.a
+
+# =============================================================================
+# Runtime output
+# =============================================================================
+
+# Generated maze files
+*.txt
+# Keep the config
+!config.txt
+
+# =============================================================================
+# OS / editor artifacts
+# =============================================================================
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Vim
+*.swp
+*.swo
