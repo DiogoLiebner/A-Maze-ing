@@ -31,6 +31,8 @@ void allocate_grid(t_data *data, int rows, int cols)
 
 static int hex_to_int(char c)
 {
+    if (c == 'Z')
+        return (16); // special stamp marker
     if (c >= '0' && c <= '9')
         return (c - '0');
     else if (c >= 'A' && c <= 'F')
