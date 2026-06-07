@@ -15,6 +15,7 @@ void draw_something(t_data *data)
 int key_hook(int keycode, void *param)
 {
     t_data *data = (t_data *)param;
+
     printf("KEY: %d\n", keycode);
 
     if (keycode == 65307) // ESC
@@ -23,9 +24,9 @@ int key_hook(int keycode, void *param)
         exit(0);
     }
 
-    if (keycode == 65293) // ENTER → regenerate maze
+    if (keycode == 65505) // LEFT SHIFT → regenerate maze
     {
-        system("python3 main.py");
+        system("python3 a_maze_ing.py config.txt --no-launch");
 
         // free old grid
         for (int i = 0; i < data->rows; i++)
@@ -46,10 +47,13 @@ int key_hook(int keycode, void *param)
 
         // resize window if dimensions changed
         int new_w = data->cols * CELL_SIZE;
-        int new_h = data->rows * CELL_SIZE;
+        int new_maze_h = data->rows * CELL_SIZE;
+        int new_h = new_maze_h + 100;
+        data->maze_h = data->rows * CELL_SIZE;
         if (new_w != data->win_w || new_h != data->win_h)
         {
             data->win_w = new_w;
+            data->win_h = new_maze_h;
             data->win_h = new_h;
             mlx_destroy_window(data->mlx, data->win);
             data->win = mlx_new_window(data->mlx, data->win_w, data->win_h, "maze");
@@ -129,8 +133,9 @@ int main(int argc, char **argv)
     /* =========================
        COMPUTE WINDOW SIZE
        ========================= */
+    data.maze_h = data.rows * CELL_SIZE;
     data.win_w = data.cols * CELL_SIZE;
-    data.win_h = data.rows * CELL_SIZE;
+    data.win_h = data.maze_h + 100;
 
     /* =========================
        CREATE WINDOW
