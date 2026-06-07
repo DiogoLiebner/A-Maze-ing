@@ -268,7 +268,7 @@ Once the program is running, the maze is rendered in a MiniLibX window. The foll
 |---|---|
 | `1` – `9` | Cycle through colour themes for the maze display |
 | `Space` | Toggle the A\* solution path on / off |
-| `Enter` | Generate a new maze (same dimensions, new layout) |
+| `Left Shift` | Generate a new maze (same dimensions, new layout) |
 | `Esc` | Exit the program |
 
 
@@ -282,3 +282,18 @@ Once the program is running, the maze is rendered in a MiniLibX window. The foll
 ## Planing of the project ##
 
 By dividing the project into two layers (Python logic and C visualizer), we can work in parallel on both components. The Python package can be developed and tested independently, while the C visualizer can be built to read the maze output once the format is defined. While continuously improving the visualizer, the other parts of the project were being developed, like the Makefile, README, and packaging.
+
+## Tools used ##
+- Python 3.x for maze generation, pathfinding, and configuration handling.
+- C and MiniLibX for graphical rendering of the maze.
+- Makefile for build automation and managing dependencies.
+- `venv` for Python virtual environment management.
+- `flake8` and `mypy` for code quality and type checking.
+- `pytest` for testing the Python package.
+- Standard library modules like `random`, `collections`, and `subprocess` for various utilities.
+- Git for version control and collaboration.
+- `twine` and `build` for packaging and distribution of the Python package.
+- `get_next_line` for efficient file reading in C.
+- `ft_split` for string parsing in C.
+
+
