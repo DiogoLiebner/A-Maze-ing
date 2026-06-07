@@ -24,13 +24,8 @@ def main() -> None:
         raise MazeError("No path found from ENTRY to EXIT")
 
     write_output(grid, config, path)
-<<<<<<< HEAD
-    subprocess.run(["./maze_viewer", config["output_file"]], check=True)
-    os.remove(config["output_file"])
-=======
     if not no_launch:
         subprocess.run(["./maze_viewer", config["output_file"]], check=True)
->>>>>>> refs/remotes/origin/main
 
 
 if __name__ == "__main__":
