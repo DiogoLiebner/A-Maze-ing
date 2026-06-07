@@ -8,8 +8,32 @@ REQUIRED_KEYS = {"width", "height", "entry", "exit", "output_file", "perfect"}
 
 
 class MazeConfig(typing.TypedDict):
-    """
-        TypedDict for the maze configuration parameters.
+    """Validated configuration parameters for maze generation.
+
+    Constructed exclusively by ``read_config()`` after all values have
+    been parsed, validated, and converted to their internal representations.
+    Coordinates are stored 0-based internally regardless of how they are
+    written in the config file.
+
+    Attributes
+    ----------
+    width : int
+        Maze width in logical cells.
+    height : int
+        Maze height in logical cells.
+    entry : tuple[int, int]
+        Start position as (row, col), 0-based.
+    exit : tuple[int, int]
+        End position as (row, col), 0-based.
+    output_file : str
+        Path to the ``.txt`` file where the maze will be written.
+    perfect : bool
+        If ``True``, no loops are added and the maze has a unique solution.
+    seed : int or None
+        Optional random seed for reproducible maze generation.
+    stamp_warning : str or None
+        Warning message set when the maze is too small for the 42 stamp,
+        ``None`` otherwise.
     """
     width: int
     height: int
@@ -27,7 +51,37 @@ def parse_coordinate(
         width: int,
         height: int
         ) -> tuple[int, int]:
+    """Parse and validate a coordinate string from the config file.
 
+    Expects a ``"x, y"`` formatted string where x is the column and y is
+    the row, both 1-based for user convenience. Converts to 0-based
+    (row, col) internally before returning.
+
+    Parameters
+    ----------
+    value : str
+        The raw coordinate string from the config file, e.g. ``"3, 5"``.
+    key : str
+        The config key name (e.g. ``"entry"`` or ``"exit"``), used in
+        error messages to identify which coordinate failed validation.
+    width : int
+        Maze width in logical cells, used to validate the x bound.
+    height : int
+        Maze height in logical cells, used to validate the y bound.
+
+    Returns
+    -------
+    tuple[int, int]
+        The validated coordinate as a 0-based ``(row, col)`` tuple.
+
+    Raises
+    ------
+    BadSyntax
+        If ``value`` is not in ``"x, y"`` format or the values are not
+        integers.
+    ImpossibleMaze
+        If the coordinate is outside the bounds of the maze dimensions.
+    """
     parts = value.split(",")
     if len(parts) != 2:
         raise BadSyntax(
@@ -54,9 +108,51 @@ def parse_coordinate(
 def read_config(
         filename: str = "config.txt"
         ) -> MazeConfig:
-    """
-        Reads the maze configuration from a file and returns a
-        dictionary with the parameters.
+    """Read, parse, and validate a maze configuration file.
+
+    Parses a plain-text ``KEY=VALUE`` config file line by line, validates
+    all required keys and their values, resolves coordinates from 1-based
+    to 0-based, and returns a fully validated ``MazeConfig``.
+
+    Blank lines and lines beginning with ``#`` are treated as comments
+    and ignored. Keys are case-insensitive. The following keys are
+    required:
+
+    - ``WIDTH``       : Maze width in logical cells (positive integer).
+    - ``HEIGHT``      : Maze height in logical cells (positive integer).
+    - ``ENTRY``       : Start coordinate in ``"x, y"`` format, 1-based.
+    - ``EXIT``        : End coordinate in ``"x, y"`` format, 1-based.
+    - ``OUTPUT_FILE`` : Path to the output ``.txt`` file.
+    - ``PERFECT``     : ``"true"`` / ``"1"`` for a perfect maze, anything
+                        else for a maze with loops.
+
+    The following key is optional:
+
+    - ``SEED`` : Integer seed for reproducible maze generation.
+
+    Parameters
+    ----------
+    filename : str, optional
+        Path to the configuration file. Defaults to ``"config.txt"``.
+
+    Returns
+    -------
+    MazeConfig
+        A fully validated ``MazeConfig`` TypedDict ready for use by
+        ``generate_maze()``.
+
+    Raises
+    ------
+    InvalidConfig
+        If the file is not found, required keys are missing, or
+        ``output_file`` does not end with ``.txt``.
+    ImpossibleMaze
+        If ``WIDTH`` or ``HEIGHT`` are not positive, entry and exit are
+        the same cell, or either coordinate falls inside the 42 stamp
+        region on a sufficiently large maze.
+    BadSyntax
+        If any line is missing ``=``, has an empty key or value, or a
+        field that expects a number receives a non-integer string.
     """
 
     config: dict[str, str] = {}

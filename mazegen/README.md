@@ -38,10 +38,10 @@ output_file = maze.txt
 perfect     = true
 ```
 
-| Key | Type | Description |
-|---|---|---|
-| `width` | int | Number of columns (≥ 8) |
-| `height` | int | Number of rows (≥ 6) |
+| Key | Type | Description | Warnings |
+|---|---|---|---|
+| `width` | int | Number of columns | If < 7, the maze cant fit the "42" pattern and will be ignored but leave a warning message in the terminal |
+| `height` | int | Number of rows | If < 5, the maze cant fit the "42" pattern and will be ignored but leave a warning message in the terminal|
 | `entry` | `col,row` | Entry point, 1-based |
 | `exit` | `col,row` | Exit point, 1-based |
 | `output_file` | str | Must end in `.txt` |
@@ -191,3 +191,58 @@ python -m build
 # → dist/mazegen-1.0.0-py3-none-any.whl
 # → dist/mazegen-1.0.0.tar.gz
 ```
+
+---
+
+## Testing
+
+The test suite uses `pytest` and is designed to be run against the installed
+package in an isolated environment, verifying that the distributed `.whl`
+is self-contained and correct.
+
+### Running tests against the installed package
+
+```bash
+# Create a fresh environment
+python3 -m venv test_env
+source test_env/bin/activate
+
+# Install the package with dev dependencies (includes pytest)
+pip install "mazegen-1.0.0-py3-none-any.whl[dev]"
+
+# Run the suite
+pytest tests/ -v
+
+deactivate
+rm -rf test_env
+```
+
+### Running tests in the development environment
+
+If you have already run `make` or `make install`, the venv is ready:
+
+```bash
+source venv/bin/activate
+pytest tests/ -v
+```
+
+Or via the Makefile target:
+
+```bash
+make test
+```
+
+### What is tested
+
+| Area | Tests |
+|---|---|
+| Grid dimensions | Output is `(2*height+1) × (2*width+1)` |
+| Cell values | Every cell is 0, 1, or 2 |
+| Entry / exit | Both cells are open after generation |
+| Determinism | Same seed always produces the same grid and path |
+| Perfect maze | Open cell count equals `width × height` |
+| Stamp | Large mazes contain stamped cells (value 2) |
+| Loops | Imperfect maze generates without error |
+| Pathfinding | Path exists, starts at entry, ends at exit |
+| Path validity | Every step is adjacent, in-bounds, and on an open cell |
+| No path | Returns `None` when exit is manually blocked |

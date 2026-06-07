@@ -24,6 +24,29 @@ def _stamp_42(
             grid: list[list[int]],
             height: int, width: int
         ) -> set[tuple[int, int]]:
+    """Stamp a '42' pattern into the centre of the maze grid.
+
+    The digits '4' and '2' are defined as 5-row pixel patterns and placed
+    side by side in the middle of the logical maze space. Stamped cells are
+    set to value 2 and returned as a set of maze coordinates so the passage
+    carver treats them as pre-visited, preserving the shape.
+
+    Parameters
+    ----------
+    grid : list[list[int]]
+        The 2D maze grid to stamp into. Modified in place.
+    height : int
+        The maze height in logical cells (not grid rows).
+    width : int
+        The maze width in logical cells (not grid cols).
+
+    Returns
+    -------
+    set[tuple[int, int]]
+        A set of (row, col) maze-coordinate tuples that were stamped,
+        to be passed to ``_carve_passages`` as pre-visited cells.
+    """
+
     digit_4 = _parse_digit(_DIGIT_4)
     digit_2 = _parse_digit(_DIGIT_2)
 
@@ -38,6 +61,25 @@ def _stamp_42(
     stamped: set[tuple[int, int]] = set()
 
     def stamp_digit(pattern: list[list[int]], offset_lc: int) -> None:
+        """Stamp a single digit pattern onto the grid at a column offset.
+
+        Iterates over the pixel pattern and, for each active pixel (value 1),
+        writes value 2 to the corresponding grid cell and records the logical
+        maze coordinate in the enclosing ``stamped`` set.
+
+        Parameters
+        ----------
+        pattern : list[list[int]]
+            A 2D list of 0/1 pixels representing the digit shape.
+        offset_lc : int
+            Column offset in logical maze coordinates, used to position
+            the digit relative to ``start_lc``.
+
+        Returns
+        -------
+        None
+        """
+
         for r in range(digit_h):
             for c in range(digit_w):
                 lr = start_lr + r
@@ -56,8 +98,24 @@ def _stamp_42(
 
 
 def _build_grid(width: int, height: int) -> list[list[int]]:
-    """
-        Initializes the maze grid with walls and spaces.
+    """Initialise a blank maze grid with all cells set to walls.
+
+    The grid uses a 2:1 scaling where each logical maze cell at position
+    (r, c) maps to grid position (2r+1, 2c+1), and the cells between
+    them represent walls that can be carved open. All cells are
+    initialised to 1 (wall).
+
+    Parameters
+    ----------
+    width : int
+        The maze width in logical cells.
+    height : int
+        The maze height in logical cells.
+
+    Returns
+    -------
+    list[list[int]]
+        A 2D list of shape ``(2*height+1, 2*width+1)`` filled with 1s.
     """
     rows: int = 2 * height + 1
     cols: int = 2 * width + 1
@@ -73,7 +131,39 @@ def _carve_passages(
         visited: set[tuple[int, int]]
 ) -> None:
     """
-        Carves passages in the grid using a depth-first search algorithm.
+    Carve passages through the grid using iterative depth-first search.
+
+    Implements the iterative backtracking algorithm. Starting from
+    (row, col), a stack tracks the current path. At each step an
+    unvisited neighbour is chosen at random and the wall between the
+    current cell and that neighbour is removed (set to 0). If no
+    unvisited neighbours remain the algorithm backtracks by popping
+    the stack, continuing until the stack is empty.
+
+    Cells already present in ``visited`` (e.g. stamped cells) are
+    never carved into, which preserves the stamp shape while allowing
+    the rest of the maze to connect around it.
+
+    Parameters
+    ----------
+    grid : list[list[int]]
+        The 2D maze grid to carve into. Modified in place.
+    row : int
+        Starting row in logical maze coordinates.
+    col : int
+        Starting column in logical maze coordinates.
+    height : int
+        Maze height in logical cells, used for bounds checking.
+    width : int
+        Maze width in logical cells, used for bounds checking.
+    visited : set[tuple[int, int]]
+        Set of already-visited logical maze coordinates. Stamped cells
+        should be added here before calling this function.
+
+    Returns
+    -------
+    None
+
     """
     stack: list[tuple[int, int]] = [(row, col)]
     visited.add((row, col))
@@ -108,10 +198,30 @@ def _carve_passages(
 
 
 def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
-    """
-        Randomly adds loops to the maze by removing valid between-cell walls.
-        This avoids even-even intersection removals and can be more aggressive
-        depending on loop_factor.
+    """Introduce random loops by selectively removing interior walls.
+
+    Collects candidate walls — cells that sit directly between two open
+    passage cells — then removes a random subset of them based on
+    ``loop_factor``. Only true between-cell walls are considered:
+
+    - Vertical walls:   odd row, even col (separates left/right neighbours).
+    - Horizontal walls: even row, odd col (separates top/bottom neighbours).
+
+    Even-even intersection points are never removed as doing so would
+    create shortcuts that bypass cells entirely.
+
+    Parameters
+    ----------
+    grid : list[list[int]]
+        The 2D maze grid to modify in place.
+    loop_factor : float
+        Fraction of candidate walls to remove, in the range [0.0, 1.0].
+        Higher values produce more loops. At least 1 wall is always
+        removed when candidates exist.
+
+    Returns
+    -------
+    None
     """
     rows: int = len(grid)
     cols: int = len(grid[0])
@@ -125,11 +235,6 @@ def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
             if grid[r][c] != 1:
                 continue
 
-            # Only consider walls that separate two cells:
-            # - vertical walls => odd row, even col
-            # - horizontal walls => even row, odd col
-            # Skip even-even intersection points, which can create
-            # illegal teleport shortcuts when removed.
             if r % 2 == 1 and c % 2 == 0:
                 if grid[r][c - 1] == 0 and grid[r][c + 1] == 0:
                     candidate_walls.append((r, c))
@@ -138,7 +243,6 @@ def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
                     candidate_walls.append((r, c))
 
     random.shuffle(candidate_walls)
-    # Remove a larger share of valid candidate walls for more loops.
     remove_count: int = max(1, int(len(candidate_walls) * loop_factor))
 
     for r, c in candidate_walls[:remove_count]:
@@ -150,7 +254,44 @@ def generate_maze(
         config: MazeConfig,
         loop_factor: float = 0.1,
         ) -> list[list[int]]:
+    """Generate a maze grid from the given configuration.
 
+    Orchestrates the full maze generation pipeline:
+
+    1. Build a blank walled grid of size ``(2*height+1) x (2*width+1)``.
+    2. Stamp the '42' pattern into the centre if the maze is large enough
+       (height > 5 and width > 7).
+    3. Seed the random number generator if a seed is provided.
+    4. Carve passages using iterative backtracking, treating stamped cells
+       as pre-visited so the pattern is preserved.
+    5. Force the entry and exit cells open.
+    6. Optionally introduce loops when ``perfect`` is ``False``.
+
+    Parameters
+    ----------
+    config : MazeConfig
+        A ``MazeConfig`` TypedDict containing the following keys:
+
+        - ``width``   (int)            : Maze width in logical cells.
+        - ``height``  (int)            : Maze height in logical cells.
+        - ``entry``   (tuple[int,int]) : Start position (row, col), 0-based.
+        - ``exit``    (tuple[int,int]) : End position (row, col), 0-based.
+        - ``perfect`` (bool)           : If ``True``, no loops are added.
+        - ``seed``    (int | None)     : Optional seed for reproducibility.
+
+    loop_factor : float, optional
+        Fraction of candidate walls to remove when ``perfect`` is ``False``.
+        Must be in the range [0.0, 1.0]. Defaults to ``0.1``.
+        Has no effect when ``perfect`` is ``True``.
+
+    Returns
+    -------
+    list[list[int]]
+        A 2D list representing the maze grid where:
+        - ``0`` = open passage
+        - ``1`` = wall
+        - ``2`` = stamped '42' decoration cell (open to the pathfinder)
+    """
     width: int = config["width"]
     height: int = config["height"]
     entry: tuple[int, int] = config["entry"]

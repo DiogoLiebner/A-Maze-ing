@@ -4,10 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mazegen"
+author = "dlima-li, rafmonte"
 version = "1.0.0"
 description = "Maze Generation algorythm package from the A-Maze-ing project"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["flake8", "mypy", "pytest"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["mazegen"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

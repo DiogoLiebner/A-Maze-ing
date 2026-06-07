@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 from mazegen import (
     read_config,
     find_path,
@@ -21,8 +22,8 @@ def main() -> None:
         raise MazeError("No path found from ENTRY to EXIT")
 
     write_output(grid, config, path)
-
     subprocess.run(["./maze_viewer", config["output_file"]], check=True)
+    os.remove(config["output_file"])
 
 
 if __name__ == "__main__":
