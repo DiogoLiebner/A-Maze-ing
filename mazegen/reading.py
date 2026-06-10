@@ -96,13 +96,13 @@ def parse_coordinate(
         )
 
     # Config coordinates are 1-based for user convenience. Convert to 0-based.
-    if not (1 <= col <= width) or not (1 <= row <= height):
+    if not (0 <= col < width) or not (0 <= row < height):
         raise ImpossibleMaze(
             f"'{key}' coordinates ({col}, {row}) out of bounds for maze size "
             f"{width}x{height}"
         )
 
-    return (row - 1, col - 1)
+    return (row, col)
 
 
 def read_config(
