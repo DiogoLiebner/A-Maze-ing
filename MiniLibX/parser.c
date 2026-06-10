@@ -137,8 +137,6 @@ void parse_maze_file(t_data *data, char *filename)
         write(1, "Invalid entry format\n", 22);
         return;
     }
-    data->entry_x -= 1;
-    data->entry_y -= 1;
 
     /* EXIT */
     if (sscanf(exit_line, "%d,%d",
@@ -147,8 +145,6 @@ void parse_maze_file(t_data *data, char *filename)
         write(1, "Invalid exit format\n", 21);
         return;
     }
-    data->exit_x -= 1;
-    data->exit_y -= 1;
 
     /* PATH */
     data->path = strdup(dir_line);
