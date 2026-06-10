@@ -233,10 +233,10 @@ def read_config(
                     f"{coord[0]}) cannot be inside the 42 stamp"
                 )
 
-    try:
-        perfect: bool = config["perfect"].lower() in ("true", "1")
-    except ValueError:
+    if config["perfect"].lower() not in ("true", "false", "1", "0"):
         raise BadSyntax("PERFECT must be 'true' or 'false'")
+
+    perfect: bool = config["perfect"].lower() in ("true", "1")
 
     seed: int | None = None
     if "seed" in config:
