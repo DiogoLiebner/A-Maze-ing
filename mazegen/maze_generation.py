@@ -201,6 +201,9 @@ def _would_create_3x3(grid: list[list[int]], r: int, c: int) -> bool:
     """
     Check if removing the wall at (r, c) would create a 3x3 open area.
     """
+    rows = len(grid)
+    cols = len(grid[0])
+
     for dr in range(-2, 1):
         for dc in range(-2, 1):
             all_open = True
@@ -208,21 +211,30 @@ def _would_create_3x3(grid: list[list[int]], r: int, c: int) -> bool:
                 for tc in range(3):
                     gr = 2 * ((r - 1) // 2 + dr + tr) + 1
                     gc = 2 * ((c - 1) // 2 + dc + tc) + 1
-                    if not (0 <= gr < len(grid) and 0 <= gc < len(grid[0])):
+                    if not (0 <= gr < rows and 0 <= gc < cols):
                         all_open = False
                         break
                     if grid[gr][gc] != 0:
                         all_open = False
                         break
-                    if tc < 2 and grid[gr][gc + 2] != 0:
-                        all_open = False
-                        break
-                    if tr < 2 and grid[gr + 2][gc] != 0:
-                        all_open = False
-                        break
+                    if tc < 2:
+                        if not (gc + 2 < cols):
+                            all_open = False
+                            break
+                        if grid[gr][gc + 2] != 0:
+                            all_open = False
+                            break
+                    if tr < 2:
+                        if not (gr + 2 < rows):
+                            all_open = False
+                            break
+                        if grid[gr + 2][gc] != 0:
+                            all_open = False
+                            break
             if all_open:
                 return True
     return False
+
 
 
 def _add_loops(grid: list[list[int]], loop_factor: float) -> None:
